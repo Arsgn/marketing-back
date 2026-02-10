@@ -32,7 +32,6 @@ export const authMiddleware = async (
       });
     }
 
-    // Найти пользователя в базе данных по supabaseId
     const dbUser = await prisma.user.findUnique({
       where: {
         supabaseId: supabaseUser.user.id,
