@@ -1,12 +1,11 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "name" TEXT,
+    "supabaseId" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "agreed" BOOLEAN,
+    "name" TEXT,
     "avatar" TEXT,
-    "supabaseId" TEXT,
+    "agreed" BOOLEAN DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -98,10 +97,10 @@ CREATE TABLE "Favorite" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "User_supabaseId_key" ON "User"("supabaseId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_supabaseId_key" ON "User"("supabaseId");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
