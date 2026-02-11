@@ -8,24 +8,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id        Int @id @default(autoincrement())
-  name      String?
-  email     String @unique
-  password  String
-  agreed    Boolean?
-  avatar    String?
+  id         Int      @id @default(autoincrement())
+  name       String?
+  email      String   @unique
+  password   String
+  agreed     Boolean?
+  avatar     String?
   supabaseId String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  messages Message[]
-  messageSender PrivateMessages[] @relation("MessageSender")
+  messages        Message[]
+  messageSender   PrivateMessages[] @relation("MessageSender")
   messageReceiver PrivateMessages[] @relation("MessageReceiver")
+  reviews         Review[]
+  favorites       Favorite[]
 }
 
-model Message{
+model Message {
   id        Int      @id @default(autoincrement())
   userId    Int
   message   String
@@ -35,16 +36,88 @@ model Message{
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-
 model PrivateMessages {
-  id        Int      @id @default(autoincrement())
-  senderId    Int
-  receiverId   Int
-  message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  message    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  sender User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 }
 
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  populars Popular[]
+}
+
+model Popular {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String
+  price       Int
+  image       String?
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  reviews   Review[]
+  favorites Favorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Available {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String
+  price       Int
+  image       String?
+
+  reviews   Review[]
+  favorites Favorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id      Int     @id @default(autoincrement())
+  rating  Int // 1-5
+  comment String?
+
+  userId    Int
+  popularId Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  popular Popular @relation(fields: [popularId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime   @default(now())
+  available   Available? @relation(fields: [availableId], references: [id])
+  availableId Int?
+
+  @@unique([userId, popularId])
+}
+
+model Favorite {
+  id Int @id @default(autoincrement())
+
+  userId    Int
+  popularId Int
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  popular Popular @relation(fields: [popularId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime   @default(now())
+  available   Available? @relation(fields: [availableId], references: [id])
+  availableId Int?
+
+  @@unique([userId, popularId])
+}
