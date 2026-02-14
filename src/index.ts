@@ -12,7 +12,7 @@ const start = async () => {
       () => {
         console.log(`${new Date()}`);
         console.log("server running at: http://localhost:" + PORT);
-      }
+      },
     );
   } catch (error) {
     console.error(error);

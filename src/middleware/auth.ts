@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { supabase } from "../plugins/supabase";
 import prisma from "../plugins/prisma";
 export interface CustomRequest extends Request {

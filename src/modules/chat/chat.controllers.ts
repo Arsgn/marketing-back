@@ -158,7 +158,7 @@ const sendPrivateMessage = async (req: CustomRequest, res: Response) => {
 
     const newMessage = await prisma.privateMessages.create({
       data: {
-        senderId: Number(senderId), 
+        senderId: Number(senderId),
         receiverId: Number(receiverId),
         message,
       },
