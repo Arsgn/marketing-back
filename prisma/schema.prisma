@@ -1,91 +1,81 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  supabaseId String    @unique
-  email      String    @unique
+  id         Int      @id @default(autoincrement())
+  supabaseId String   @unique
+  email      String   @unique
   name       String?
   avatar     String?
-  agreed     Boolean?  @default(false)
+  agreed     Boolean? @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  messages        Message[]
-  sentMessages    PrivateMessages[] @relation("MessageSender")
+  messages         Message[]
+  sentMessages     PrivateMessages[] @relation("MessageSender")
   receivedMessages PrivateMessages[] @relation("MessageReceiver")
-  reviews         Review[]
-  favorites       Favorite[]
+  reviews          Review[]
+  favorites        Favorite[]
 }
 
-model Message{
+model Message {
   id        Int      @id @default(autoincrement())
   userId    Int
   message   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PrivateMessages {
-  id        Int      @id @default(autoincrement())
-  senderId    Int
-  receiverId   Int
-  message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  sender User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  message    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  populars Popular[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  populars  Popular[]
 }
 
 model Popular {
-  id          Int     @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   description String
   price       Int
   image       String?
-
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  reviews   Review[]
-  favorites Favorite[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  categoryId  Int
+  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  reviews     Review[]
+  favorites   Favorite[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Available {
-  id          Int     @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   description String
   price       Int
   image       String?
-
-  reviews   Review[]
-  favorites Favorite[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  reviews     Review[]
+  favorites   Favorite[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Review {
