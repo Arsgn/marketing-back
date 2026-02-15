@@ -4,4 +4,5 @@ import categoryControllers from "./category.controllers";
 const categoryRoutes = Router();
 categoryRoutes.get("/get", categoryControllers.getCategories);
 categoryRoutes.post("/post", categoryControllers.postCategory);
+categoryRoutes.delete("/delete/:id", categoryControllers.deleteCategory);
 export default categoryRoutes;

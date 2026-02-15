@@ -73,4 +73,37 @@ const postCategory = async (req: Request, res: Response) => {
   }
 };
 
-export default { postCategory, getCategories };
+const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const category = await prisma.category.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category с таким ID не найден!!!",
+      });
+    }
+
+    await prisma.category.delete({
+      where: { id: Number(id) },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Category успешно удален",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+export default { postCategory, getCategories, deleteCategory };
