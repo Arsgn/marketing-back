@@ -1,5 +1,3 @@
-// GET /reviews
-
 import { Request, Response } from "express";
 import prisma from "../../plugins/prisma";
 
@@ -12,7 +10,10 @@ const getReview = async (req: Request, res: Response) => {
         available: true,
       },
     });
-    res.status(200).json(reviews);
+    res.status(200).json({
+      success: true,
+      data: reviews,
+    });
   } catch (error) {
     res.status(500).json({ error: error });
   }

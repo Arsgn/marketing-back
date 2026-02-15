@@ -1,110 +1,80 @@
 import { Request, Response } from "express";
 import prisma from "../../plugins/prisma";
 
-const categoryGet = async (req: Request, res: Response) => {
+const getCategories = async (req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany({
-      include: {
-        populars: true,
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        populars: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            price: true,
+            image: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      categories,
+      data: categories,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       success: false,
-      message: "Error fetching categories",
-      error,
+      message: "Server error",
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
 
-const categoryCreate = async (req: Request, res: Response) => {
+const postCategory = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
 
-    if (!name) {
+    if (!name || !name.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Name is required",
+        message: "Category name is required",
+      });
+    }
+
+    const exists = await prisma.category.findUnique({
+      where: { name },
+    });
+
+    if (exists) {
+      return res.status(400).json({
+        success: false,
+        message: "Category already exists",
       });
     }
 
     const category = await prisma.category.create({
-      data: {
-        name,
-      },
+      data: { name },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: category,
     });
-  } catch (error: any) {
-    res.status(500).json({
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
       success: false,
-      message: "Error creating category",
-      error: error.message,
+      message: "Server error",
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
 
-const categoryUpdate = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { name } = req.body;
-
-    const updated = await prisma.category.update({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        name,
-      },
-    });
-
-    res.status(200).json({
-      success: true,
-      data: updated,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating category",
-      error: error.message,
-    });
-  }
-};
-
-const deleteCategory = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    await prisma.category.delete({
-      where: {
-        id: Number(id),
-      },
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Category успешно удалена",
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Ошибка при удалении",
-      error: error.message,
-    });
-  }
-};
-
-export default {
-  categoryGet,
-  categoryCreate,
-  categoryUpdate,
-  deleteCategory,
-};
+export default { postCategory, getCategories };

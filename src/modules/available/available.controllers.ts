@@ -4,15 +4,14 @@ import prisma from "../../plugins/prisma";
 const getAvailable = async (req: Request, res: Response) => {
   try {
     const getProduct = await prisma.available.findMany({
-      where: { id: 1 },
       select: {
         id: true,
         title: true,
         description: true,
         image: true,
         price: true,
-        reviews: true,
-        favorites: true,
+        reviews: true, // эгер relation болсо
+        favorites: true, // эгер relation болсо
       },
     });
 
@@ -21,17 +20,25 @@ const getAvailable = async (req: Request, res: Response) => {
       data: getProduct,
     });
   } catch (error) {
+    console.log(error); // ката болсо консолго чыгарат
     res.status(500).json({
       success: false,
-      error: `Error in:getAvailable `,
+      error: `Error in:getAvailable`,
     });
   }
 };
 
 const postAvailable = async (req: Request, res: Response) => {
   try {
-    const getProduct = await prisma.available.findMany({
-      where: { id: 1 },
+    const { title, description, price, image } = req.body;
+
+    const newProduct = await prisma.available.create({
+      data: {
+        title,
+        description,
+        price,
+        image,
+      },
       select: {
         id: true,
         title: true,
@@ -43,14 +50,14 @@ const postAvailable = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
-      data: getProduct,
+      data: newProduct,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: `Error in:getAvailable `,
+      error: "Error in postAvailable",
     });
   }
 };

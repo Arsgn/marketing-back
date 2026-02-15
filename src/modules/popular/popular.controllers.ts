@@ -4,16 +4,20 @@ import prisma from "../../plugins/prisma";
 const getPopular = async (req: Request, res: Response) => {
   try {
     const popular = await prisma.popular.findMany({
-      where: { id: 1 },
       select: {
         id: true,
         title: true,
         description: true,
         image: true,
         price: true,
-        category: true,
-        reviews: true,
-        favorites: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        reviews: true, // Эгер relation болсо
+        favorites: true, // Эгер relation болсо
       },
     });
 
@@ -22,6 +26,7 @@ const getPopular = async (req: Request, res: Response) => {
       data: popular,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       error: `Error in getPopular: ${error}`,
@@ -31,31 +36,19 @@ const getPopular = async (req: Request, res: Response) => {
 
 const postPopular = async (req: Request, res: Response) => {
   try {
-    const { title, description, image, price, categoryId } = req.body;
-    if (!title.trim()) {
-      return res.status(401).json({
-        success: false,
-        message: "Названия обязательное!!!",
-      });
-    }
-    // Проверка: такой тур уже есть?
-    const exists = await prisma.popular.findFirst({
-      where: { title },
-    });
+    let { title, description, image, price, categoryId } = req.body;
 
-    if (exists) {
-      return res.status(400).json({
-        success: false,
-        message: "Такой тур уже существует!",
-      });
+    price = Number(price);
+    if (!title || !description || isNaN(price)) {
+      return res.status(400).json({ message: "Missing or invalid fields" });
     }
 
     const addPopular = await prisma.popular.create({
       data: {
         title,
         description,
-        image,
         price,
+        image,
         categoryId,
       },
     });
@@ -73,42 +66,27 @@ const postPopular = async (req: Request, res: Response) => {
 };
 
 const deletePopular = async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
+  const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Не передан ID!!!",
-      });
-    }
+  const product = await prisma.popular.findUnique({
+    where: { id: Number(id) },
+  });
 
-    const exists = await prisma.popular.findUnique({
-      where: { id },
-    });
-
-    if (!exists) {
-      return res.status(404).json({
-        success: false,
-        message: "Product с таким ID не найден!!!",
-      });
-    }
-
-    const del = await prisma.popular.delete({
-      where: { id },
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Product успешно удалён!!!",
-      del,
-    });
-  } catch (error) {
-    return res.status(500).json({
+  if (!product) {
+    return res.status(404).json({
       success: false,
-      message: `Ошибка при удалении: ${error}`,
+      message: "Product с таким ID не найден!!!",
     });
   }
+
+  await prisma.popular.delete({
+    where: { id: Number(id) },
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Product успешно удален",
+  });
 };
 
 const putPopular = async (req: Request, res: Response) => {
