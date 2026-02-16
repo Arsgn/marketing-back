@@ -7,8 +7,8 @@ const router = Router();
 router.get("/get-all", authMiddleware, chatControllers.getMessages);
 router.post("/send", authMiddleware, chatControllers.sendMessage);
 router.get("/users", authMiddleware, chatControllers.getUsers);
+router.get("/last-messages", authMiddleware, chatControllers.getLastMessages); 
 router.get("/private/:receiverId", authMiddleware, chatControllers.getPrivateMessages);
 router.post("/private/send", authMiddleware, chatControllers.sendPrivateMessage);
-
 
 export default router;

@@ -176,10 +176,69 @@ const sendPrivateMessage = async (req: CustomRequest, res: Response) => {
   }
 };
 
+const getLastMessages = async (req: CustomRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Не авторизован",
+      });
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          not: Number(userId),
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const lastMessages = await Promise.all(
+      users.map(async (user) => {
+        const lastMessage = await prisma.privateMessages.findFirst({
+          where: {
+            OR: [
+              { senderId: Number(userId), receiverId: user.id },
+              { senderId: user.id, receiverId: Number(userId) },
+            ],
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 1,
+        });
+
+        return {
+          userId: user.id,
+          lastMessage: lastMessage?.message || null,
+          createdAt: lastMessage?.createdAt || null,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: lastMessages,
+    });
+  } catch (error) {
+    console.error("Ошибка получения последних сообщений:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Ошибка получения последних сообщений",
+    });
+  }
+};
+
 export default {
   getMessages,
   sendMessage,
   getUsers,
   getPrivateMessages,
   sendPrivateMessage,
+  getLastMessages, 
 };
