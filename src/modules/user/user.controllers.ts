@@ -3,6 +3,52 @@ import prisma from "../../plugins/prisma";
 import { supabase } from "../../plugins/supabase";
 import { CustomRequest } from "../../middleware/auth";
 
+// Получить текущего пользователя (новый эндпоинт)
+const getMe = async (req: CustomRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user?.id) {
+      res.status(401).json({
+        success: false,
+        error: "Не авторизован",
+      });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: Number(req.user.id) },
+      select: {
+        id: true,
+        supabaseId: true,
+        email: true,
+        name: true,
+        avatar: true,
+        agreed: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: "Пользователь не найден",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error("Ошибка при получении текущего пользователя:", error);
+    res.status(500).json({
+      success: false,
+      error: "Внутренняя ошибка сервера",
+    });
+  }
+};
+
 const getUserById = async (
   req: CustomRequest,
   res: Response,
@@ -57,55 +103,61 @@ const signUpUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Регистрация в Supabase
+    // Регистрация в Supabase с автоподтверждением
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          name: name || null,
+          avatar: avatar || null,
+        },
+      },
     });
 
-    if (authError || !authData.user) {
+    if (authError) {
       res.status(400).json({
         success: false,
-        error: authError?.message || "Ошибка регистрации",
+        error: authError.message,
       });
       return;
     }
 
-    // Проверка существования пользователя
-    const existingUser = await prisma.user.findUnique({
+    if (!authData.user) {
+      res.status(400).json({
+        success: false,
+        error: "Ошибка создания пользователя",
+      });
+      return;
+    }
+
+    // Проверяем, существует ли пользователь в БД
+    let user = await prisma.user.findUnique({
       where: { supabaseId: authData.user.id },
     });
 
-    if (existingUser) {
-      res.status(200).json({
-        success: true,
+    // Если пользователь не существует, создаем его
+    if (!user) {
+      user = await prisma.user.create({
         data: {
-          user: existingUser,
-          session: authData.session,
+          supabaseId: authData.user.id,
+          email: authData.user.email!,
+          name: name || null,
+          avatar: avatar || null,
+          agreed: false,
+        },
+        select: {
+          id: true,
+          supabaseId: true,
+          email: true,
+          name: true,
+          avatar: true,
+          agreed: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
-      return;
     }
-
-    // Создание пользователя в базе данных
-    const user = await prisma.user.create({
-      data: {
-        supabaseId: authData.user.id,
-        email: authData.user.email!,
-        name: name || null,
-        avatar: avatar || null,
-        agreed: false,
-      },
-      select: {
-        id: true,
-        supabaseId: true,
-        email: true,
-        name: true,
-        avatar: true,
-        agreed: true,
-        createdAt: true,
-      },
-    });
 
     res.status(201).json({
       success: true,
@@ -135,20 +187,30 @@ const signInUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Вход через Supabase
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-    if (authError || !authData.user) {
+    if (authError) {
       res.status(401).json({
         success: false,
-        error: authError?.message || "Неверный email или пароль",
+        error: "Неверный email или пароль",
       });
       return;
     }
 
+    if (!authData.user) {
+      res.status(401).json({
+        success: false,
+        error: "Ошибка входа",
+      });
+      return;
+    }
+
+    // Получаем или создаем пользователя в БД
     let user = await prisma.user.findUnique({
       where: { supabaseId: authData.user.id },
       select: {
@@ -177,6 +239,7 @@ const signInUser = async (req: Request, res: Response): Promise<void> => {
           name: true,
           avatar: true,
           agreed: true,
+          updatedAt: true,
         },
       });
     }
@@ -216,7 +279,7 @@ const refreshToken = async (req: Request, res: Response): Promise<void> => {
     if (error || !data.session) {
       res.status(401).json({
         success: false,
-        error: error?.message || "Невалидный refresh token",
+        error: "Невалидный refresh token",
       });
       return;
     }
@@ -270,6 +333,7 @@ const updateUser = async (req: CustomRequest, res: Response): Promise<void> => {
     const { id } = req.params;
     const { name, avatar, agreed } = req.body;
 
+    // Проверка прав доступа
     if (req.user?.id !== id) {
       res.status(403).json({
         success: false,
@@ -310,6 +374,7 @@ const updateUser = async (req: CustomRequest, res: Response): Promise<void> => {
 };
 
 export {
+  getMe,
   getUserById,
   signUpUser,
   signInUser,
