@@ -33,7 +33,7 @@ const postReview = async (req: Request, res: Response) => {
         comment,
         userId,
         popularId,
-        availableId, // бул опционалдуу
+        availableId,
       },
     });
     res.status(201).json(newReview);
