@@ -6,6 +6,6 @@ const popularRoutes = Router();
 popularRoutes.get("/get", popularControllers.getPopular);
 popularRoutes.post("/post", popularControllers.postPopular);
 popularRoutes.delete("/delete/:id", popularControllers.deletePopular);
-popularRoutes.put("/put", popularControllers.putPopular);
+popularRoutes.put("/update/:id", popularControllers.putPopular);
 
 export default popularRoutes;

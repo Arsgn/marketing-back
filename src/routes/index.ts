@@ -6,6 +6,7 @@ import popularRoutes from "../modules/popular/popular.routes";
 import availableRoutes from "../modules/available/available.routes";
 import notificationRoutes from "../modules/notification/notification.routes";
 import categoryRoutes from "../modules/category/category.routes";
+import favoriteRoutes from "../modules/favorite/favorite.routes";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/popular", popularRoutes);
 router.use("/available", availableRoutes);
 router.use("/notification", notificationRoutes);
 router.use("/category", categoryRoutes);
+router.use("/favorite", favoriteRoutes);
 
 export default router;
