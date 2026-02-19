@@ -23,6 +23,7 @@ model User {
   receivedMessages PrivateMessages[] @relation("MessageReceiver")
   reviews          Review[]
   favorites        Favorite[]
+  notifications    Notification[]
 }
 
 model Message {
@@ -112,4 +113,15 @@ model Favorite {
   availableId Int?
 
   @@unique([userId, popularId])
+}
+
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
