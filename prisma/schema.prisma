@@ -95,7 +95,7 @@ model Review {
   available   Available? @relation(fields: [availableId], references: [id])
   availableId Int?
 
-  @@unique([userId, popularId])
+  @@unique([userId, popularId], name: "userId_popularId")
 }
 
 model Favorite {
