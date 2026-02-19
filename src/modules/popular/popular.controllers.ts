@@ -10,14 +10,15 @@ const getPopular = async (req: Request, res: Response) => {
         description: true,
         image: true,
         price: true,
+        categoryId: true,
         category: {
           select: {
             id: true,
             name: true,
           },
         },
-        reviews: true, // Эгер relation болсо
-        favorites: true, // Эгер relation болсо
+        reviews: true, 
+        favorites: true, 
       },
     });
 
@@ -145,3 +146,4 @@ export default {
   deletePopular,
   putPopular,
 };
+

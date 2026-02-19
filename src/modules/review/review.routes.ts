@@ -2,9 +2,10 @@ import { Router } from "express";
 import reviewControllers from "./review.controllers";
 
 const reviewRoutes = Router();
-reviewRoutes.get("/get", reviewControllers.getReview);
-reviewRoutes.post("/post", reviewControllers.postReview);
-reviewRoutes.delete("/delete/:id", reviewControllers.deleteReview);
-reviewRoutes.put("/put", reviewControllers.putReview);
+
+reviewRoutes.get("/reviews", reviewControllers.getReview);
+reviewRoutes.post("/reviews", reviewControllers.postReview);
+reviewRoutes.put("/reviews/:id", reviewControllers.putReview);
+reviewRoutes.delete("/reviews/:id", reviewControllers.deleteReview);
 
 export default reviewRoutes;
