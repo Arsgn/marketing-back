@@ -1,6 +1,27 @@
 import { Request, Response } from "express";
 import prisma from "../../plugins/prisma";
 
+const getPopularById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    const popular = await prisma.popular.findUnique({
+      where: { id },
+    });
+
+    if (!popular) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json({
+      success: true,
+      data: popular,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 const getPopular = async (req: Request, res: Response) => {
   try {
     const popular = await prisma.popular.findMany({
@@ -10,14 +31,15 @@ const getPopular = async (req: Request, res: Response) => {
         description: true,
         image: true,
         price: true,
+        categoryId: true,
         category: {
           select: {
             id: true,
             name: true,
           },
         },
-        reviews: true, // Эгер relation болсо
-        favorites: true, // Эгер relation болсо
+        reviews: true,
+        favorites: true,
       },
     });
 
@@ -144,4 +166,5 @@ export default {
   postPopular,
   deletePopular,
   putPopular,
+  getPopularById,
 };

@@ -10,6 +10,7 @@ const getReview = async (req: Request, res: Response) => {
         available: true,
       },
     });
+
     res.status(200).json({
       success: true,
       data: reviews,
@@ -20,65 +21,127 @@ const getReview = async (req: Request, res: Response) => {
 };
 
 const postReview = async (req: Request, res: Response) => {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
-  const { rating, comment, userId, popularId, availableId } = req.body;
-
   try {
+    const { rating, comment, userId, popularId, availableId } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 1 and 5",
+      });
+    }
+
+    const existingReview = await prisma.review.findUnique({
+      where: {
+        userId_popularId: {
+          userId,
+          popularId,
+        },
+      },
+    });
+
+    if (existingReview) {
+      return res.status(400).json({
+        success: false,
+        message: "You already reviewed this product",
+      });
+    }
+
     const newReview = await prisma.review.create({
       data: {
         rating,
         comment,
         userId,
-        popularId,
-        availableId,
+        popularId: popularId || undefined,
+        availableId: availableId || undefined,
       },
     });
-    res.status(201).json(newReview);
+    return res.status(201).json({
+      success: true,
+      data: newReview,
+    });
   } catch (error) {
-    res.status(500).json({ error: error });
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
 const putReview = async (req: Request, res: Response) => {
-  if (req.method !== "PUT") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
-  const { id } = req.query;
-  const { rating, comment, availableId } = req.body;
-
   try {
-    const updatedReview = await prisma.review.update({
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+
+    if (rating && (rating < 1 || rating > 5)) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 1 and 5",
+      });
+    }
+
+    const review = await prisma.review.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
+    const updated = await prisma.review.update({
       where: { id: Number(id) },
       data: {
-        rating,
-        comment,
-        availableId,
+        ...(rating !== undefined && { rating }),
+        ...(comment && { comment }),
       },
     });
-    res.status(200).json(updatedReview);
+
+    return res.status(200).json({
+      success: true,
+      data: updated,
+    });
   } catch (error) {
-    res.status(500).json({ error: error });
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
 const deleteReview = async (req: Request, res: Response) => {
-  if (req.method !== "DELETE") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
-
-  const { id } = req.query;
-
   try {
+    const { id } = req.params;
+
+    const review = await prisma.review.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: "Review not found",
+      });
+    }
+
     await prisma.review.delete({
       where: { id: Number(id) },
     });
-    res.status(200).json({ message: "Review deleted successfully" });
+
+    return res.status(200).json({
+      success: true,
+      message: "Review deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ error: error });
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 

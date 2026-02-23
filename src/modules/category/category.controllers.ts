@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../plugins/prisma";
 
+// GET ALL
 const getCategories = async (req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany({
@@ -37,6 +38,7 @@ const getCategories = async (req: Request, res: Response) => {
   }
 };
 
+// CREATE
 const postCategory = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
@@ -77,4 +79,101 @@ const postCategory = async (req: Request, res: Response) => {
   }
 };
 
-export default { postCategory, getCategories };
+// UPDATE
+const updateCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name is required",
+      });
+    }
+
+    const category = await prisma.category.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    // проверяем уникальность имени
+    const exists = await prisma.category.findFirst({
+      where: {
+        name,
+        NOT: { id: Number(id) },
+      },
+    });
+
+    if (exists) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name already exists",
+      });
+    }
+
+    const updated = await prisma.category.update({
+      where: { id: Number(id) },
+      data: { name },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: updated,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+// DELETE
+const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const category = await prisma.category.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found",
+      });
+    }
+
+    await prisma.category.delete({
+      where: { id: Number(id) },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+export default {
+  postCategory,
+  getCategories,
+  updateCategory,
+  deleteCategory,
+};
