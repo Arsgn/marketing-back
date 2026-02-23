@@ -10,6 +10,7 @@ const getReview = async (req: Request, res: Response) => {
         available: true,
       },
     });
+
     res.status(200).json({
       success: true,
       data: reviews,
@@ -51,10 +52,6 @@ const postReview = async (req: Request, res: Response) => {
         rating,
         comment,
         userId,
-        popularId,
-        availableId,
-      },
-    });
 
     return res.status(201).json({
       success: true,
@@ -96,8 +93,7 @@ const putReview = async (req: Request, res: Response) => {
     const updated = await prisma.review.update({
       where: { id: Number(id) },
       data: {
-        rating,
-        comment,
+
       },
     });
 

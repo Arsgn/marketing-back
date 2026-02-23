@@ -150,4 +150,51 @@ const putAvailable = async (req: Request, res: Response) => {
   }
 };
 
-export default { getAvailable, postAvailable, deleteAvailable, putAvailable };
+const getAvailableById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    // 🔒 ID текшерүү
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ID",
+      });
+    }
+
+    const available = await prisma.available.findUnique({
+      where: { id },
+      include: {
+        reviews: true,
+        favorites: true,
+      },
+    });
+
+    if (!available) {
+      return res.status(404).json({
+        success: false,
+        message: "Available not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: available,
+    });
+  } catch (error) {
+    console.error("getAvailableById error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export default {
+  getAvailable,
+  postAvailable,
+  deleteAvailable,
+  putAvailable,
+  getAvailableById,
+};

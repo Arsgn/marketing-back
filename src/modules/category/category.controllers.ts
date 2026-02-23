@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../plugins/prisma";
 
+// GET ALL
 const getCategories = async (req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany({
@@ -37,6 +38,7 @@ const getCategories = async (req: Request, res: Response) => {
   }
 };
 
+// CREATE
 const postCategory = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
@@ -77,6 +79,7 @@ const postCategory = async (req: Request, res: Response) => {
   }
 };
 
+
 const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -99,6 +102,7 @@ const updateCategory = async (req: Request, res: Response) => {
         message: "Category not found",
       });
     }
+
 
     const exists = await prisma.category.findFirst({
       where: {
@@ -132,6 +136,7 @@ const updateCategory = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 const deleteCategory = async (req: Request, res: Response) => {
   try {
