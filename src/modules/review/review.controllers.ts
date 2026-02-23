@@ -52,10 +52,7 @@ const postReview = async (req: Request, res: Response) => {
         rating,
         comment,
         userId,
-        popularId: popularId || undefined,
-        availableId: availableId || undefined,
-      },
-    });
+
     return res.status(201).json({
       success: true,
       data: newReview,
@@ -68,6 +65,7 @@ const postReview = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 const putReview = async (req: Request, res: Response) => {
   try {
@@ -95,8 +93,7 @@ const putReview = async (req: Request, res: Response) => {
     const updated = await prisma.review.update({
       where: { id: Number(id) },
       data: {
-        ...(rating !== undefined && { rating }),
-        ...(comment && { comment }),
+
       },
     });
 
@@ -112,6 +109,7 @@ const putReview = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 const deleteReview = async (req: Request, res: Response) => {
   try {
@@ -144,5 +142,6 @@ const deleteReview = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 export default { getReview, postReview, putReview, deleteReview };

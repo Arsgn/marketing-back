@@ -115,6 +115,7 @@ model Favorite {
   @@unique([userId, popularId])
 }
 
+
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int

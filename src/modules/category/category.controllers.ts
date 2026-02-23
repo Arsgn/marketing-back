@@ -79,7 +79,7 @@ const postCategory = async (req: Request, res: Response) => {
   }
 };
 
-// UPDATE
+
 const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -103,7 +103,7 @@ const updateCategory = async (req: Request, res: Response) => {
       });
     }
 
-    // проверяем уникальность имени
+
     const exists = await prisma.category.findFirst({
       where: {
         name,
@@ -137,7 +137,7 @@ const updateCategory = async (req: Request, res: Response) => {
   }
 };
 
-// DELETE
+
 const deleteCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

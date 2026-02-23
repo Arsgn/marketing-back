@@ -38,8 +38,7 @@ const getPopular = async (req: Request, res: Response) => {
             name: true,
           },
         },
-        reviews: true,
-        favorites: true,
+
       },
     });
 
@@ -168,3 +167,4 @@ export default {
   putPopular,
   getPopularById,
 };
+
