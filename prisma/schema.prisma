@@ -119,6 +119,7 @@ model Favorite {
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
+  senderId  Int?
   title     String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())

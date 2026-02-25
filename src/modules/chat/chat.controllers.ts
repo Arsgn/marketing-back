@@ -137,6 +137,45 @@ const getPrivateMessages = async (req: CustomRequest, res: Response) => {
   }
 };
 
+// const sendPrivateMessage = async (req: CustomRequest, res: Response) => {
+//   try {
+//     const senderId = req.user?.id;
+//     const { receiverId, message } = req.body;
+
+//     if (!senderId) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Не авторизован",
+//       });
+//     }
+
+//     if (!receiverId || !message) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "receiverId и message обязательны",
+//       });
+//     }
+
+//     const newMessage = await prisma.privateMessages.create({
+//       data: {
+//         senderId: Number(senderId),
+//         receiverId: Number(receiverId),
+//         message,
+//       },
+//     });
+
+//     return res.status(201).json({
+//       success: true,
+//       data: newMessage,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Ошибка отправки приватного сообщения",
+//     });
+//   }
+// };
+
 const sendPrivateMessage = async (req: CustomRequest, res: Response) => {
   try {
     const senderId = req.user?.id;
@@ -149,18 +188,19 @@ const sendPrivateMessage = async (req: CustomRequest, res: Response) => {
       });
     }
 
-    if (!receiverId || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "receiverId и message обязательны",
-      });
-    }
-
     const newMessage = await prisma.privateMessages.create({
       data: {
         senderId: Number(senderId),
         receiverId: Number(receiverId),
         message,
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: Number(receiverId),
+        senderId: Number(senderId),
+        title: "У вас новое сообщение",
       },
     });
 

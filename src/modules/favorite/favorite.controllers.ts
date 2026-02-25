@@ -3,7 +3,7 @@ import { Response } from "express";
 import prisma from "../../plugins/prisma";
 import { CustomRequest } from "../../middleware/auth";
 
-// Получить избранные курсы пользователя
+// Получить избранные курсы пользователя   
 const getFavorites = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
     const userId = Number(req.user?.id);
