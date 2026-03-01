@@ -199,7 +199,7 @@ const getLastMessages = async (req: CustomRequest, res: Response) => {
     });
 
     const lastMessages = await Promise.all(
-      users.map(async (user) => {
+      users.map(async (user: any) => {
         const lastMessage = await prisma.privateMessages.findFirst({
           where: {
             OR: [

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
 }
 
 model User {
@@ -14,10 +14,8 @@ model User {
   name       String?
   avatar     String?
   agreed     Boolean? @default(false)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   messages         Message[]
   sentMessages     PrivateMessages[] @relation("MessageSender")
   receivedMessages PrivateMessages[] @relation("MessageReceiver")
@@ -41,7 +39,6 @@ model PrivateMessages {
   message    String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
   sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 }
@@ -84,32 +81,25 @@ model Review {
   id      Int     @id @default(autoincrement())
   rating  Int
   comment String?
-
   userId    Int
   popularId Int
-
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   popular Popular @relation(fields: [popularId], references: [id], onDelete: Cascade)
-
   createdAt   DateTime   @default(now())
   available   Available? @relation(fields: [availableId], references: [id])
   availableId Int?
-
   @@unique([userId, popularId])
 }
 
 model Favorite {
   id Int @id @default(autoincrement())
-
   userId    Int
   popularId Int
-
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   popular Popular @relation(fields: [popularId], references: [id], onDelete: Cascade)
-
   createdAt   DateTime   @default(now())
-  available   Available? @relation(fields: [availableId], references: [id])
+  // available   Available? @relation(fields: [availableId], references: [id])
   availableId Int?
-
+  available   Available? @relation(fields: [availableId], references: [id])
   @@unique([userId, popularId])
 }

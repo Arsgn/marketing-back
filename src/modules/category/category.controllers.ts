@@ -40,14 +40,12 @@ const getCategories = async (req: Request, res: Response) => {
 const postCategory = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-
     if (!name || !name.trim()) {
       return res.status(400).json({
         success: false,
         message: "Category name is required",
       });
     }
-
     const exists = await prisma.category.findUnique({
       where: { name },
     });

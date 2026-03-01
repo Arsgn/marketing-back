@@ -14,7 +14,6 @@ router.use("/chat", chatRoutes);
 router.use("/review", reviewRoutes);
 router.use("/popular", popularRoutes);
 router.use("/available", availableRoutes);
-
 router.use("/category", categoryRoutes);
 
 export default router;
