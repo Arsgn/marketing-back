@@ -24,6 +24,8 @@ model User {
   reviews          Review[]
   favorites        Favorite[]
   notifications    Notification[]
+
+  sentNotifications Notification[] @relation("NotificationSender")
 }
 
 model Message {
@@ -124,5 +126,6 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user   User  @relation(fields: [userId], references: [id])
+  sender User? @relation("NotificationSender", fields: [senderId], references: [id])
 }

@@ -13,15 +13,24 @@ const getNotifications = async (req: CustomRequest, res: Response) => {
       });
     }
 
-    const notifications = await prisma.notification.findMany({
-      where: {
-        userId: Number(userId),
-        isRead: false,
+  const notifications = await prisma.notification.findMany({
+  where: {
+    userId: Number(userId),
+    isRead: false,
+  },
+  orderBy: {
+    createdAt: "desc",
+  },
+  include: {
+    sender: {
+      select: {
+        id: true,
+        name: true,
+        avatar: true,
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    },
+  },
+});
 
     return res.status(200).json({
       success: true,
