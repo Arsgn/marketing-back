@@ -11,7 +11,7 @@ export const buildServer = () => {
   const configCors = {
     origin: [
       "http://localhost:3000",
-      "https://restaurant-mqgq.vercel.app",
+      "https://marketing-front-5ies.vercel.app",
     ],
     credentials: true,
   };
